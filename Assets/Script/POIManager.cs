@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -10,6 +11,9 @@ public class POIManager : MonoBehaviour
     [SerializeField] private List<Transform> POIs = new();
 
     [HideInInspector] public UnityEvent OnPhotoShot;
+
+    [SerializeField] private TMP_Text _scoreText;
+    private int _currentScore = 0;
     private void Awake()
     {
         if (Instance == null)
@@ -33,14 +37,24 @@ public class POIManager : MonoBehaviour
         }
     }
 
-    private Transform GetRandomPOI()
+    private void Update()
     {
-        return POIs[Random.Range(0, POIs.Count)];
+        _scoreText.text = string.Format("Score: {0}", _currentScore);
     }
 
-    public Transform SetPOIImage(ref Picture picture)
+    private Transform GetRandomPOI(Transform storedPOI)
     {
-        Transform POI = GetRandomPOI();
+        Transform randomPOI = storedPOI;
+        while (randomPOI == storedPOI)
+        {
+            randomPOI = POIs[Random.Range(0, POIs.Count)];
+        }
+        return randomPOI;
+    }
+
+    public Transform SetPOIImage(ref Picture picture, Transform storedPOI)
+    {
+        Transform POI = GetRandomPOI(storedPOI);
         _cameraManager.TakeScreenshotOf(ref picture, POI);
         return POI;
     }
@@ -48,5 +62,10 @@ public class POIManager : MonoBehaviour
     public void Photoshoot()
     {
         OnPhotoShot?.Invoke();
+    }
+
+    public void AddPoint()
+    {
+        _currentScore++;
     }
 }
