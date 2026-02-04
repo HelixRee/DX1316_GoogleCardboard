@@ -7,8 +7,9 @@ public class CameraManager : MonoBehaviour
     private Camera _camera;
 
     [Header("Zoom")]
-    [SerializeField] private float _defaultFOV = 60f;
-    [SerializeField] private float _zoomedFOV = 30f;
+    [SerializeField] private float _defaultOffset = 60f;
+    [SerializeField] private float _zoomedOffset = 30f;
+    private float _offset = 0f;
     [SerializeField] private float _zoomSmoothSpeed = 12f;
 
     [Header("Screenshot")]
@@ -18,20 +19,29 @@ public class CameraManager : MonoBehaviour
     [SerializeField] private LayerMask _defaultLayerMask;
     [SerializeField] private float _pictureLaunchPower = 10f;
     [SerializeField] private float _pictureSpinPower = 10f;
-    private bool takeScreenshotOnNextFrame = false;
 
 
     private void Start()
     {
         _camera = GetComponent<Camera>();
         _input.onHoldTrigger.AddListener(TakeScreenshot);
+
     }
-    private void Update()
+    private void LateUpdate()
     {
+        //if (_input.zoomEnabled)
+        //    _camera.fieldOfView = Mathf.Lerp(_camera.fieldOfView, _zoomedOffset, Time.deltaTime * _zoomSmoothSpeed);
+        //else
+        //    _camera.fieldOfView = Mathf.Lerp(_camera.fieldOfView, _defaultOffset, Time.deltaTime * _zoomSmoothSpeed);
         if (_input.zoomEnabled)
-            _camera.fieldOfView = Mathf.Lerp(_camera.fieldOfView, _zoomedFOV, Time.deltaTime * _zoomSmoothSpeed);
+            _offset = Mathf.Lerp(_offset, _zoomedOffset, Time.deltaTime * _zoomSmoothSpeed);
         else
-            _camera.fieldOfView = Mathf.Lerp(_camera.fieldOfView, _defaultFOV, Time.deltaTime * _zoomSmoothSpeed);
+            _offset = Mathf.Lerp(_offset, _defaultOffset, Time.deltaTime * _zoomSmoothSpeed);
+
+        Vector3 pos = _camera.transform.localPosition;
+        pos = _camera.transform.forward * _offset;
+        _camera.transform.localPosition = pos;
+
     }
 
     private void TakeScreenshot()
